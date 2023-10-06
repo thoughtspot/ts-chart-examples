@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "target": "es2018",
+        "module": "esnext",
+        "declaration": true,
+        "declarationMap": true,
+        "moduleResolution": "node",
+        "lib": ["esnext", "es2018", "es2017", "es2016", "es5", "es6", "dom"],
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "removeComments": true,
+        "noImplicitAny": false,
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
+        "rootDir": "src",
+        "outDir": "lib",
+        "jsx": "react",
+        "incremental": true
+    },
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
+    "exclude": ["lib", "dist", "node_modules", "cjs"]
+}
