@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TS TML chart</title>
+  <script type="module" crossorigin src="https://thoughtspot.github.io/ts-chart-examples/assets/tester-chart-ba8572f2.js"></script>
+  <link rel="modulepreload" crossorigin href="https://thoughtspot.github.io/ts-chart-examples/assets/index-94b3058b.js">
+  <link rel="modulepreload" crossorigin href="https://thoughtspot.github.io/ts-chart-examples/assets/chartjs-plugin-datalabels.esm-3e57def8.js">
+  <link rel="modulepreload" crossorigin href="https://thoughtspot.github.io/ts-chart-examples/assets/auto.esm-c3926bfe.js">
+</head>
+
+<body>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: medium;
+            width: 600px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color:  #2770EF;
+            color: white;
+            box-shadow: none;
+            border-radius: 20px;
+            border: 0;
+            margin: 5px 0px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            margin: 10px;
+            padding: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            box-shadow: inset;
+        }
+
+        input {
+            min-width: 550px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 0;
+        }
+    </style>
+    <div style="width:99vw; height:95vh; position: relative;">
+        <h3>TML Query</h3>
+        <div style="display:block" class="container" id="tml-box">
+        </div>
+        <h3>Data Query</h3>
+        <div style="display:block" class="container" id="kpi-box">
+        </div>
+        <h3>Menus</h3>
+        <div style="display:block" class="container" id="axis-menu-box">
+            <button id="close-axis-menu">Close Axis Menu</button>
+            <button id="open-axis-menu">Open Axis Menu</button>
+            <button id="open-single-column-menu">Open Single Column Axis Menu</button>
+            <button id="show-event-error">Show Event Error</button>
+        </div>
+    </div>
+    
+</body>
+
+</html>
