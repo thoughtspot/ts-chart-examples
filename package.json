@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "nx-install": "pnpm run build",
-    "build": "tsc -p .; tsc -p . --module commonjs --outDir cjs",
-    "bundle": "vite build",
-    "copy-bundle": "bash copy-bundle.sh",
+    "compile": "tsc -p .; tsc -p . --module commonjs --outDir cjs",
+    "build": "vite build",
+    "build:prod": "vite build --base=https://thoughtspot.github.io/ts-chart-examples/",
     "dev": "vite --port 3002",
-    "serve": "vite serve",
+    "serve": "vite serve ./dist",
     "lint": "eslint 'src/**'",
     "lint:fix": "eslint 'src/**' '--fix'"
   },
