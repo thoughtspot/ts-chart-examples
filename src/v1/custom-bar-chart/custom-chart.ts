@@ -19,6 +19,7 @@ import {
     getChartContext,
     PointVal,
     Query,
+    ValidationResponse,
     VisualProps,
 } from '@thoughtspot/ts-chart-sdk';
 import Chart from 'chart.js/auto';
@@ -325,6 +326,30 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
                     ],
                 },
             ],
+        },
+        validateConfig: (updatedConfig, chartModel): ValidationResponse => {
+            if (updatedConfig.length !== 1) {
+                return {
+                    isValid: false,
+                    validationErrorMessage: ['invalid config. no config found'],
+                };
+            }
+            // assuming 0 is x dimension
+            const dimensions = updatedConfig[0].dimensions;
+            if (
+                dimensions[0].columns.length === 0 ||
+                dimensions[1].columns.length === 0
+            ) {
+                return {
+                    isValid: false,
+                    validationErrorMessage: [
+                        'Invalid config. X or Y axis columns cannot be empty.',
+                    ],
+                };
+            }
+            return {
+                isValid: true,
+            };
         },
     });
 
