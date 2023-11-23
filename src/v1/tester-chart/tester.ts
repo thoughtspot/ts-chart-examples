@@ -205,6 +205,16 @@ async function handleAxisMenuButtons(ctx: CustomChartContext) {
                 clientY: ev.clientY,
             },
             columnIds: colIds,
+            customActions: [
+                {
+                    id: 'custom-axis-action',
+                    label: 'Custom axis action',
+                    icon: '',
+                    onClick: (...arg) => {
+                        console.log('custom axis action triggered', arg);
+                    },
+                },
+            ],
         });
     });
 
@@ -227,6 +237,12 @@ async function handleAxisMenuButtons(ctx: CustomChartContext) {
         .getElementById('close-axis-menu')
         ?.addEventListener('click', ev => {
             ctx.emitEvent(ChartToTSEvent.CloseAxisMenu);
+        })
+
+    document
+        .getElementById('close-context-menu')
+        ?.addEventListener('click', ev => {
+            ctx.emitEvent(ChartToTSEvent.CloseContextMenu);
         });
 
     document
@@ -239,6 +255,41 @@ async function handleAxisMenuButtons(ctx: CustomChartContext) {
                     x: ev.x,
                 } as any,
                 columnIds: [],
+            });
+        });
+
+    document
+        .getElementById('open-context-menu')
+        ?.addEventListener('click', ev => {
+            const chartModel = ctx.getChartModel();
+            const colIds = chartModel.columns.map(col => col.id);
+            ctx.emitEvent(ChartToTSEvent.OpenContextMenu, {
+                event: {
+                    clientX: ev.clientX,
+                    clientY: ev.clientY,
+                },
+                clickedPoint: {
+                    tuple: [
+                        {
+                            "columnId": colIds[0],
+                            "value": "x"
+                        },
+                        {
+                            "columnId": colIds[1],
+                            "value": "y"
+                        }
+                    ],
+                },
+                customActions: [
+                    {
+                        id: 'custom-context-action',
+                        label: 'Custom context action',
+                        icon: '',
+                        onClick: (...arg) => {
+                            console.log('custom context action triggered', arg);
+                        },
+                    },
+                ],
             });
         });
 }
