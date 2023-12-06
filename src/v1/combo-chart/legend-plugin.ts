@@ -75,6 +75,7 @@ export const htmlLegendPlugin = {
         li.style.flexDirection = "row";
         li.style.marginLeft = "10px";
         li.style.marginBottom = "10px";
+        li.style.minWidth = '110px';
 
         li.onclick = () => {
           const { type } = chart.config;
