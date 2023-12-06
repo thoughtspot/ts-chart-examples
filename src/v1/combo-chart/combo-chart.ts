@@ -603,10 +603,17 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
             // Check if "y" axis column is not empty
             const yDimension = chart.dimensions.find((dim) => dim.key === "y");
 
-            if (!yDimension || yDimension.columns.length !== 1) {
-              res.isValid = false;
-              res.errorMessage = `Invalid config. Y axis column should not be empty for ${chart.key} chart while slicing with an attribute`;
-              return res;
+            if (yDimension) {
+              if(yDimension.columns.length === 0) {
+                res.isValid = false; 
+                res.errorMessage = `Invalid config. Y axis column should not be empty for ${chart.key} chart while slicing with an attribute`;
+                return res;
+              }
+              if(yDimension.columns.length > 1) {
+                res.isValid = false; 
+                res.errorMessage = `Invalid config. Y axis column should not be more than 1 for ${chart.key} chart while slicing with an attribute`;
+                return res;
+              }
             }
           }
         }
