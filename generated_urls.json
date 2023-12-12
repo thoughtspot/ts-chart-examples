@@ -1,5 +1,9 @@
 [
   {
+    "name": "combo-chart",
+    "sourceUrl": "http://localhost:3002/v1/combo-chart/"
+  },
+  {
     "name": "custom-bar-chart",
     "sourceUrl": "http://localhost:3002/v1/custom-bar-chart/"
   },
