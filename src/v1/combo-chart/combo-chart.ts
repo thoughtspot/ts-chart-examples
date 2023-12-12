@@ -88,33 +88,33 @@ function getSeriesDataForColumn(column: ChartColumn, dataArr: DataPointsArray) {
 function getDataForColumnForSeries(
   column: ChartColumn,
   dataArr: DataPointsArray,
-  col: any
+  legendValue: any
 ) {
   const idx = _.findIndex(dataArr.columns, (colId) => column.id === colId);
   return dataArr.dataValue
-    .filter((item) => item[2] === col)
+    .filter((item) => item[2] === legendValue) // item[2] -> Legend data value
     .map((row) => row[idx]);
 }
 
 function getChartDataModel(
   configDimensions,
   dataArr: DataPointsArray,
-  inputType
+  chartType,
 ) {
-  const xAxisColumns = configDimensions?.[0].columns ?? [];
-  const yAxisColumns = configDimensions?.[1].columns ?? [];
-  const legend = configDimensions?.[2]?.columns[0] ?? [];
-  const type = inputType.split("-")[0];
-  const isStacked = inputType.split("-").length > 1;
+  const xAxisColumns = configDimensions.find(dim => dim.key === 'x')?.columns ?? [];
+  const yAxisColumns = configDimensions.find(dim => dim.key === 'y')?.columns  ?? [];
+  const legend = configDimensions.find(dim => dim.key === 'legend')?.columns[0] ?? [];
+  const type = chartType.split("-")[0];
+  const isStacked = chartType.split("-").length > 1;
 
   return {
     getLabels: () => getDataForColumn(xAxisColumns[0], dataArr),
     getDatasets: () => {
       if (!_.isEmpty(legend)) {
-        return _.map(getSeriesDataForColumn(legend, dataArr), (col, idx) => {
+        return _.map(getSeriesDataForColumn(legend, dataArr), (legendValue, idx) => {
           return {
-            label: `${col}- ${inputType}`,
-            data: getDataForColumnForSeries(yAxisColumns[0], dataArr, col),
+            label: `${legendValue}- ${chartType}`,
+            data: getDataForColumnForSeries(yAxisColumns[0], dataArr, legendValue),
             type: `${type}`,
             // yAxisID: `${type}-y${idx.toString()}`,
             stack: `${type}-x0${isStacked ? "-stacked" : "y" + idx.toString()}`,
@@ -129,7 +129,7 @@ function getChartDataModel(
       } else {
         return _.map(yAxisColumns, (col, idx) => {
           return {
-            label: `${col.name}- ${inputType}`,
+            label: `${col.name}- ${chartType}`,
             data: getDataForColumn(col, dataArr),
             //yAxisID: `${type}-y${idx.toString()}`,
             stack: `${type}-x0${isStacked ? "-stacked" : "y" + idx.toString()}`,
@@ -146,7 +146,6 @@ function getChartDataModel(
     },
 
     getPointDetails: (xPos: number, yPos: number): PointVal[] => {
-      console.log(type);
       if (!_.isEmpty(legend)) {
         return [
           {
@@ -180,33 +179,33 @@ function getChartDataModel(
 
 function getDataModel(chartModel: ChartModel) {
   const xColumnDimension =
-    chartModel.config?.chartConfig?.[0].dimensions.filter(
+    chartModel.config?.chartConfig?.find(config => config.key === COMBO_CHART_TYPE.bar).dimensions.filter(
       (dim) => dim.key === "x"
     )[0];
   // column chart model
   const columnChartModel = getChartDataModel(
-    chartModel.config?.chartConfig?.[0].dimensions ?? [],
+    chartModel.config?.chartConfig?.find(config => config.key === COMBO_CHART_TYPE.bar).dimensions ?? [],
     chartModel.data?.[0].data ?? ([] as any),
     COMBO_CHART_TYPE.bar
   );
 
   // line chart model
   const lineChartModel = getChartDataModel(
-    [xColumnDimension, ...chartModel.config?.chartConfig?.[1].dimensions] ?? [],
+    [xColumnDimension, ...chartModel.config?.chartConfig?.find(config => config.key === COMBO_CHART_TYPE.line).dimensions] ?? [],
     chartModel.data?.[1].data ?? ([] as any),
     COMBO_CHART_TYPE.line
   );
 
   // stacked chart model
   const stackedChartModel = getChartDataModel(
-    [xColumnDimension, ...chartModel.config?.chartConfig?.[2].dimensions] ?? [],
+    [xColumnDimension, ...chartModel.config?.chartConfig?.find(config => config.key === COMBO_CHART_TYPE.stack).dimensions] ?? [],
     chartModel.data?.[2].data ?? ([] as any),
     COMBO_CHART_TYPE.stack
   );
 
   // scatter chart model
   const scatterChartModel = getChartDataModel(
-    [xColumnDimension, ...chartModel.config?.chartConfig?.[3].dimensions] ?? [],
+    [xColumnDimension, ...chartModel.config?.chartConfig?.find(config => config.key === COMBO_CHART_TYPE.scatter).dimensions] ?? [],
     chartModel.data?.[3].data ?? ([] as any),
     COMBO_CHART_TYPE.scatter
   );
@@ -387,7 +386,7 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
 
       const axisConfig: ChartConfig[] = [
         {
-          key: "column",
+          key: "bar",
           dimensions: [
             {
               key: "x",
@@ -401,30 +400,15 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
         },
         {
           key: "line",
-          dimensions: [
-            {
-              key: "y",
-              columns: measureColumns.slice(0, 2),
-            },
-          ],
+          dimensions: [],
         },
         {
-          key: "stacked-column",
-          dimensions: [
-            {
-              key: "y",
-              columns: measureColumns.slice(0, 2),
-            },
-          ],
+          key: "bar-stack",
+          dimensions: [],
         },
         {
           key: "scatter",
-          dimensions: [
-            {
-              key: "y",
-              columns: measureColumns.slice(0, 2),
-            },
-          ],
+          dimensions: [],
         },
       ];
       return axisConfig;
@@ -456,7 +440,7 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
     renderChart: (ctx) => renderChart(ctx),
     chartConfigEditorDefinition: [
       {
-        key: "column",
+        key: "bar",
         label: "Custom Column",
         descriptionText:
           "X Axis can only have attributes, Y Axis can only have measures, Color can only have attributes. " +
@@ -510,7 +494,7 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
         ],
       },
       {
-        key: "stacked-column",
+        key: "bar-stack",
         label: "Custom Stacked Column",
         descriptionText:
           "X Axis can only have attributes, Y Axis can only have measures, Color can only have attributes. " +
@@ -576,11 +560,11 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
       if (updatedConfig.length <= 0) {
         return {
           isValid: false,
-          validationErrorMessage: ["invalid config. no config found"],
+          validationErrorMessage: ["Invalid config. no config found"],
         };
       }
-      // assuming 0 is x dimension
-      const xAxisDimensions = updatedConfig[0];
+
+      const xAxisDimensions = updatedConfig.find(config => config.key === COMBO_CHART_TYPE.bar);
       const yAxisDimensions = updatedConfig
         .map((config) => ({ type: config.key, dimensions: config.dimensions }))
         .map((item) => {
@@ -612,6 +596,11 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
               if(yDimension.columns.length > 1) {
                 res.isValid = false; 
                 res.errorMessage = `Invalid config. Y axis column should not be more than 1 for ${chart.key} chart while slicing with an attribute`;
+                return res;
+              }
+              if(legend.columns.length > 1) {
+                res.isValid = false; 
+                res.errorMessage = `Invalid config. Legend column should not be more than 1 for ${chart.key} chart`;
                 return res;
               }
             }
