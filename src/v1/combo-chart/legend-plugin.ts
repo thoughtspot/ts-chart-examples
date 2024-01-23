@@ -9,12 +9,8 @@ const getOrCreateLegendList = (chart, id) => {
     listContainer.style.display = "flex";
     listContainer.style.flexDirection = "column";
     listContainer.style.margin = "0";
-    listContainer.style.padding = "0";
     listContainer.style.height = "95vh";
     listContainer.style.overflowY = "overlay";
-    listContainer.style.alignItems = "end";
-    listContainer.style.paddingRight = "10px";
-
     legendContainer.appendChild(listContainer);
   }
 
@@ -34,7 +30,7 @@ export const htmlLegendPlugin = {
     // Reuse the built-in legendItems generator
 
     const chartMap = {
-      bar: [],
+      column: [],
       line: [],
       stack: [],
       scatter: [],
@@ -47,7 +43,7 @@ export const htmlLegendPlugin = {
 
       switch (chartType) {
         case "bar":
-          chartMap.bar.push(style);
+          chartMap.column.push(style);
           break;
         case "line":
           chartMap.line.push(style);
@@ -64,7 +60,9 @@ export const htmlLegendPlugin = {
     });
     _.entries(chartMap).forEach((item) => {
       const div = document.createElement("div");
-      div.innerHTML = `<p style="padding-bottom: '10px';">${
+      div.innerHTML = `<p style="
+      font-family: sans-serif; font-size:14px;
+  ">${
         item[0].charAt(0).toUpperCase() + item[0].slice(1)
       }</p>`;
       item[1].forEach((item) => {
@@ -76,6 +74,7 @@ export const htmlLegendPlugin = {
         li.style.marginLeft = "10px";
         li.style.marginBottom = "10px";
         li.style.minWidth = '110px';
+        li.style.opacity = item.hidden ? "0.3" : "1";
 
         li.onclick = () => {
           const { type } = chart.config;
@@ -108,9 +107,9 @@ export const htmlLegendPlugin = {
         textContainer.style.color = item.fontColor;
         textContainer.style.margin = "0";
         textContainer.style.padding = "0";
-        textContainer.style.textDecoration = item.hidden ? "line-through" : "";
         textContainer.style.fontFamily = "sans-serif";
-        textContainer.style.fontSize = "14px";
+        textContainer.style.fontWeight = "500";
+        textContainer.style.fontSize = "0.85rem";
 
         const text = document.createTextNode(item.text.split("- ")[0]);
         textContainer.appendChild(text);

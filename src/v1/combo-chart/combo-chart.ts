@@ -25,7 +25,7 @@ import {
 import Chart from "chart.js/auto";
 import { htmlLegendPlugin } from "./legend-plugin";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import _, { find } from "lodash";
+import _ from "lodash";
 
 const logger = console;
 
@@ -36,15 +36,14 @@ let globalChartReference: Chart;
 const visualPropKeyMap = ["datalabels", "hideLegend"];
 
 const availableColors = [
-  "#FF0000",
-  "#00FF00",
-  "#0000FF",
-  "#FFFF00",
+  "#66CCFF",
+  "#E3394A",
+  "#F5CB4E",
+  "#32CD32",
   "#FF00FF",
   "#00FFFF",
   "#FF4500",
   "#8A2BE2",
-  "#32CD32",
   "#1E90FF",
   "#FFD700",
   "#9932CC",
@@ -75,6 +74,27 @@ const COMBO_CHART_TYPE = {
   scatter: "scatter",
 };
 
+const MIN_WIDTH_TO_SHOW_LEGEND = 300;
+
+const CHART_ORDER = {
+  bar: 0,
+  line: -1,
+  stack: 0,
+  scatter: -2,
+};
+
+const numberFormatter = (value) => {
+  if (value > 1000000000) {
+    return (value / 1000000000).toFixed(2) + "B";
+  }
+  if (value > 1000000) {
+    return (value / 1000000).toFixed(2) + "M";
+  }
+  if (value > 1000) {
+    return (value / 1000).toFixed(2) + "K";
+  }
+};
+
 function getDataForColumn(column: ChartColumn, dataArr: DataPointsArray) {
   const idx = _.findIndex(dataArr.columns, (colId) => column.id === colId);
   return _.uniq(_.map(dataArr.dataValue, (row) => row[idx]));
@@ -99,11 +119,14 @@ function getDataForColumnForSeries(
 function getChartDataModel(
   configDimensions,
   dataArr: DataPointsArray,
-  chartType,
+  chartType
 ) {
-  const xAxisColumns = configDimensions.find(dim => dim.key === 'x')?.columns ?? [];
-  const yAxisColumns = configDimensions.find(dim => dim.key === 'y')?.columns  ?? [];
-  const legend = configDimensions.find(dim => dim.key === 'legend')?.columns[0] ?? [];
+  const xAxisColumns =
+    configDimensions.find((dim) => dim.key === "x")?.columns ?? [];
+  const yAxisColumns =
+    configDimensions.find((dim) => dim.key === "y")?.columns ?? [];
+  const legend =
+    configDimensions.find((dim) => dim.key === "legend")?.columns[0] ?? [];
   const type = chartType.split("-")[0];
   const isStacked = chartType.split("-").length > 1;
 
@@ -111,21 +134,31 @@ function getChartDataModel(
     getLabels: () => getDataForColumn(xAxisColumns[0], dataArr),
     getDatasets: () => {
       if (!_.isEmpty(legend)) {
-        return _.map(getSeriesDataForColumn(legend, dataArr), (legendValue, idx) => {
-          return {
-            label: `${legendValue}- ${chartType}`,
-            data: getDataForColumnForSeries(yAxisColumns[0], dataArr, legendValue),
-            type: `${type}`,
-            // yAxisID: `${type}-y${idx.toString()}`,
-            stack: `${type}-x0${isStacked ? "-stacked" : "y" + idx.toString()}`,
-            yPos: idx,
-            backgroundColor: '',
-            borderColor: '',
-            datalabels: {
-              anchor: "end",
-            },
-          };
-        });
+        return _.map(
+          getSeriesDataForColumn(legend, dataArr),
+          (legendValue, idx) => {
+            return {
+              label: `${legendValue}- ${chartType}`,
+              data: getDataForColumnForSeries(
+                yAxisColumns[0],
+                dataArr,
+                legendValue
+              ),
+              type: `${type}`,
+              // yAxisID: `${type}-y${idx.toString()}`,
+              stack: `${type}-x0${
+                isStacked ? "-stacked" : "y" + idx.toString()
+              }`,
+              yPos: idx,
+              backgroundColor: "",
+              borderColor: "",
+              datalabels: {
+                anchor: "end",
+              },
+              order: CHART_ORDER[chartType],
+            };
+          }
+        );
       } else {
         return _.map(yAxisColumns, (col, idx) => {
           return {
@@ -134,12 +167,13 @@ function getChartDataModel(
             //yAxisID: `${type}-y${idx.toString()}`,
             stack: `${type}-x0${isStacked ? "-stacked" : "y" + idx.toString()}`,
             type: `${type}`,
-            backgroundColor: '',
-            borderColor: '',
+            backgroundColor: "",
+            borderColor: "",
             yPos: idx,
             datalabels: {
               anchor: "end",
             },
+            order: CHART_ORDER[chartType],
           };
         });
       }
@@ -178,35 +212,54 @@ function getChartDataModel(
 }
 
 function getDataModel(chartModel: ChartModel) {
-  const xColumnDimension =
-    chartModel.config?.chartConfig?.find(config => config.key === COMBO_CHART_TYPE.bar).dimensions.filter(
-      (dim) => dim.key === "x"
-    )[0];
+  const xColumnDimension = chartModel.config?.chartConfig
+    ?.find((config) => config.key === "xAxis")
+    .dimensions.filter((dim) => dim.key === "x")[0];
   // column chart model
   const columnChartModel = getChartDataModel(
-    chartModel.config?.chartConfig?.find(config => config.key === COMBO_CHART_TYPE.bar).dimensions ?? [],
-    chartModel.data?.[0].data ?? ([] as any),
+    [
+      xColumnDimension,
+      ...chartModel.config?.chartConfig?.find(
+        (config) => config.key === COMBO_CHART_TYPE.bar
+      ).dimensions,
+    ] ?? [],
+    chartModel.data?.[1].data ?? ([] as any),
     COMBO_CHART_TYPE.bar
   );
 
   // line chart model
   const lineChartModel = getChartDataModel(
-    [xColumnDimension, ...chartModel.config?.chartConfig?.find(config => config.key === COMBO_CHART_TYPE.line).dimensions] ?? [],
-    chartModel.data?.[1].data ?? ([] as any),
+    [
+      xColumnDimension,
+      ...chartModel.config?.chartConfig?.find(
+        (config) => config.key === COMBO_CHART_TYPE.line
+      ).dimensions,
+    ] ?? [],
+    chartModel.data?.[2].data ?? ([] as any),
     COMBO_CHART_TYPE.line
   );
 
   // stacked chart model
   const stackedChartModel = getChartDataModel(
-    [xColumnDimension, ...chartModel.config?.chartConfig?.find(config => config.key === COMBO_CHART_TYPE.stack).dimensions] ?? [],
-    chartModel.data?.[2].data ?? ([] as any),
+    [
+      xColumnDimension,
+      ...chartModel.config?.chartConfig?.find(
+        (config) => config.key === COMBO_CHART_TYPE.stack
+      ).dimensions,
+    ] ?? [],
+    chartModel.data?.[3].data ?? ([] as any),
     COMBO_CHART_TYPE.stack
   );
 
   // scatter chart model
   const scatterChartModel = getChartDataModel(
-    [xColumnDimension, ...chartModel.config?.chartConfig?.find(config => config.key === COMBO_CHART_TYPE.scatter).dimensions] ?? [],
-    chartModel.data?.[3].data ?? ([] as any),
+    [
+      xColumnDimension,
+      ...chartModel.config?.chartConfig?.find(
+        (config) => config.key === COMBO_CHART_TYPE.scatter
+      ).dimensions,
+    ] ?? [],
+    chartModel.data?.[4].data ?? ([] as any),
     COMBO_CHART_TYPE.scatter
   );
 
@@ -249,12 +302,11 @@ function getParsedEvent(evt: any) {
 function render(ctx: CustomChartContext) {
   const chartModel = ctx.getChartModel();
   const dataModel = getDataModel(chartModel);
+  const xAxisColumnName = chartModel.config?.chartConfig
+    ?.find((config) => config.key === "xAxis")
+    .dimensions.filter((dim) => dim.key === "x")[0].columns[0].name;
   const allowLabels = _.get(chartModel.visualProps, visualPropKeyMap[0], false);
-  const allowLegends = _.get(
-    chartModel.visualProps,
-    visualPropKeyMap[1],
-    true
-  );
+  const allowLegends = _.get(chartModel.visualProps, visualPropKeyMap[1], true);
   if (!dataModel) {
     return;
   }
@@ -264,15 +316,15 @@ function render(ctx: CustomChartContext) {
     const legend = document.getElementById("legend");
     const chartWrapper = document.getElementById("chartWrapper");
     if (allowLegends) {
-      legend.style.display = "unset";
-      chartWrapper.style.width = "85%";
+      legend.style.display = "flex";
+      chartWrapper.style.width = "100%";
     } else {
-      legend.style.display = "none";
+      legend.style.display = "flex";
       chartWrapper.style.width = "100%";
     }
     // clear canvas.
     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
-
+    const formatter = new Intl.NumberFormat("en-US");
     globalChartReference = new Chart(canvas as any, {
       type: "bar",
       data: {
@@ -283,10 +335,20 @@ function render(ctx: CustomChartContext) {
         animation: {
           duration: 0,
         },
+        scales: {
+          y: {
+            ticks: {
+              callback: (value) => {
+                if (value > 10000000) return numberFormatter(value);
+              },
+            },
+          },
+        },
         plugins: {
           // Change options for ALL labels of THIS CHART
           datalabels: {
             display: allowLabels ? "auto" : false,
+            formatter: (value) => numberFormatter(value),
             color: "blue",
             textStrokeColor: "white",
             textStrokeWidth: 5,
@@ -301,6 +363,23 @@ function render(ctx: CustomChartContext) {
               },
             },
           },
+          tooltip: {
+            enabled: true,
+            displayColors: false,
+            position: "nearest",
+            callbacks: {
+              label: (item) => {
+                const value = item.dataset.data[item.dataIndex];
+                const localeValue = numberFormatter(value);
+                return `${item.dataset.label.split("-")[0]}: ${localeValue}`;
+              },
+              title: (item) => {
+                console.log(item);
+                return `${xAxisColumnName}: ${item[0].label}`;
+              },
+            },
+            titleFont: { size: 11, weight: "none" },
+          },
           legend: {
             display: false,
           },
@@ -314,7 +393,7 @@ function render(ctx: CustomChartContext) {
         },
         onClick: (e: any) => {
           const activeElement = e.chart.getActiveElements()[0];
-          if(!activeElement) {
+          if (!activeElement) {
             ctx.emitEvent(ChartToTSEvent.CloseContextMenu);
             return;
           }
@@ -344,6 +423,16 @@ function render(ctx: CustomChartContext) {
       },
 
       plugins: [htmlLegendPlugin],
+    });
+    window.addEventListener("resize", () => {
+      if (
+        window.document.activeElement.getBoundingClientRect().width <
+        MIN_WIDTH_TO_SHOW_LEGEND
+      ) {
+        legend.style.display = "none";
+      } else {
+        legend.style.display = "flex";
+      }
     });
   } catch (e) {
     logger.error("renderfailed", e);
@@ -386,12 +475,17 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
 
       const axisConfig: ChartConfig[] = [
         {
-          key: "bar",
+          key: "xAxis",
           dimensions: [
             {
               key: "x",
               columns: [attributeColumns[0]],
             },
+          ],
+        },
+        {
+          key: "bar",
+          dimensions: [
             {
               key: "y",
               columns: measureColumns.slice(0, 2),
@@ -440,23 +534,30 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
     renderChart: (ctx) => renderChart(ctx),
     chartConfigEditorDefinition: [
       {
-        key: "bar",
-        label: "Custom Column",
-        descriptionText:
-          "X Axis can only have attributes, Y Axis can only have measures, Color can only have attributes. " +
-          "Should have just 1 column in Y axis with colors columns.",
+        key: "xAxis",
+        label: "Common Axis",
+        descriptionText: "X Axis can only have attributes",
         columnSections: [
           {
             key: "x",
-            label: "Custom X Axis",
+            label: "X Axis",
             allowAttributeColumns: true,
             allowMeasureColumns: false,
             allowTimeSeriesColumns: true,
             maxColumnCount: 1,
           },
+        ],
+      },
+      {
+        key: "bar",
+        label: "Column",
+        descriptionText:
+          "X Axis can only have attributes, Y Axis can only have measures, Color can only have attributes. " +
+          "Should have just 1 column in Y axis with colors columns.",
+        columnSections: [
           {
             key: "y",
-            label: "Custom Y Axis",
+            label: "Y Axis",
             allowAttributeColumns: false,
             allowMeasureColumns: true,
             allowTimeSeriesColumns: false,
@@ -472,14 +573,14 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
       },
       {
         key: "line",
-        label: "Custom Line",
+        label: "Line",
         descriptionText:
           "X Axis can only have attributes, Y Axis can only have measures, Color can only have attributes. " +
           "Should have just 1 column in Y axis with colors columns.",
         columnSections: [
           {
             key: "y",
-            label: "Custom Y Axis",
+            label: "Y Axis",
             allowAttributeColumns: false,
             allowMeasureColumns: true,
             allowTimeSeriesColumns: false,
@@ -495,14 +596,14 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
       },
       {
         key: "bar-stack",
-        label: "Custom Stacked Column",
+        label: "Stacked Column",
         descriptionText:
           "X Axis can only have attributes, Y Axis can only have measures, Color can only have attributes. " +
           "Should have just 1 column in Y axis with colors columns.",
         columnSections: [
           {
             key: "y",
-            label: "Custom Y Axis",
+            label: "Y Axis",
             allowAttributeColumns: false,
             allowMeasureColumns: true,
             allowTimeSeriesColumns: false,
@@ -518,14 +619,14 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
       },
       {
         key: "scatter",
-        label: "Custom Scatter",
+        label: "Scatter",
         descriptionText:
           "X Axis can only have attributes, Y Axis can only have measures, Color can only have attributes. " +
           "Should have just 1 column in Y axis with colors columns.",
         columnSections: [
           {
             key: "y",
-            label: "Custom Y Axis",
+            label: "Y Axis",
             allowAttributeColumns: false,
             allowMeasureColumns: true,
             allowTimeSeriesColumns: false,
@@ -544,13 +645,13 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
       elements: [
         {
           key: "datalabels",
-          type: "toggle",
+          type: "checkbox",
           defaultValue: false,
           label: "Data Labels",
         },
         {
           key: "hideLegend",
-          type: "toggle",
+          type: "checkbox",
           defaultValue: true,
           label: "Legends",
         },
@@ -564,14 +665,16 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
         };
       }
 
-      const xAxisDimensions = updatedConfig.find(config => config.key === COMBO_CHART_TYPE.bar);
+      const xAxisDimensions = updatedConfig.find(
+        (config) => config.key === "xAxis"
+      );
       const yAxisDimensions = updatedConfig
         .map((config) => ({ type: config.key, dimensions: config.dimensions }))
-        .map((item) => {
+        .filter((item) => {
           const filteredColumns = item.dimensions.filter(
             (column) => column.key === "y"
           );
-          return { axis: filteredColumns[0], type: item.type };
+          return filteredColumns.length;
         });
 
       const legendValidation = () => {
@@ -588,18 +691,18 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
             const yDimension = chart.dimensions.find((dim) => dim.key === "y");
 
             if (yDimension) {
-              if(yDimension.columns.length === 0) {
-                res.isValid = false; 
+              if (yDimension.columns.length === 0) {
+                res.isValid = false;
                 res.errorMessage = `Invalid config. Y axis column should not be empty for ${chart.key} chart while slicing with an attribute`;
                 return res;
               }
-              if(yDimension.columns.length > 1) {
-                res.isValid = false; 
+              if (yDimension.columns.length > 1) {
+                res.isValid = false;
                 res.errorMessage = `Invalid config. Y axis column should not be more than 1 for ${chart.key} chart while slicing with an attribute`;
                 return res;
               }
-              if(legend.columns.length > 1) {
-                res.isValid = false; 
+              if (legend.columns.length > 1) {
+                res.isValid = false;
                 res.errorMessage = `Invalid config. Legend column should not be more than 1 for ${chart.key} chart`;
                 return res;
               }
@@ -623,7 +726,7 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
       };
 
       const yAxisValidation = () => {
-        if (find(yAxisDimensions, (axis) => axis.axis.columns.length !== 0)) {
+        if (yAxisDimensions.length !== 0) {
           return { isValid: true };
         } else {
           return {
