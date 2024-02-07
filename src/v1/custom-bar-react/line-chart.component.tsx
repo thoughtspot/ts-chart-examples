@@ -38,6 +38,18 @@ ChartJS.register(
     Legend,
 );
 
+const numberFormatter = (value) => {
+    if (value > 1000000000) {
+      return (value / 1000000000).toFixed(2) + "B";
+    }
+    if (value > 1000000) {
+      return (value / 1000000).toFixed(2) + "M";
+    }
+    if (value > 1000) {
+      return (value / 1000).toFixed(2) + "K";
+    }
+  };
+
 interface LineChartProps {
     chartModel: ChartModel;
     emitShowToolTip: (args_0: ShowToolTipEventPayload) => Promise<void>;
@@ -269,17 +281,20 @@ export const LineChart = ({
                     },
                     // Change options for ALL labels of THIS CHART
                     datalabels: {
-                        display: dataModel.getAllowLabels(),
-                        color: 'blue',
+                        display: dataModel.getAllowLabels()? "auto" : false,
+                        formatter: (value) => numberFormatter(value),
+                        color: "blue",
+                        textStrokeColor: "white",
+                        textStrokeWidth: 5,
                         labels: {
-                            title: {
-                                font: {
-                                    weight: 'bold',
-                                },
+                          title: {
+                            font: {
+                              weight: "bold",
                             },
-                            value: {
-                                color: 'green',
-                            },
+                          },
+                          value: {
+                            color: "black",
+                          },
                         },
                     },
                 },
