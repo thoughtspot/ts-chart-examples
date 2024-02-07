@@ -40,6 +40,18 @@ const visualPropKeyMap = {
     2: 'accordion.datalabels',
 };
 
+const numberFormatter = (value) => {
+    if (value > 1000000000) {
+      return (value / 1000000000).toFixed(2) + "B";
+    }
+    if (value > 1000000) {
+      return (value / 1000000).toFixed(2) + "M";
+    }
+    if (value > 1000) {
+      return (value / 1000).toFixed(2) + "K";
+    }
+  };
+
 function getDataForColumn(column: ChartColumn, dataArr: DataPointsArray) {
     const idx = _.findIndex(dataArr.columns, colId => column.id === colId);
     return _.map(dataArr.dataValue, row => row[idx]);
@@ -156,17 +168,20 @@ function render(ctx: CustomChartContext) {
                 plugins: {
                     // Change options for ALL labels of THIS CHART
                     datalabels: {
-                        display: allowLabels,
-                        color: 'blue',
+                        display: allowLabels? "auto" : false,
+                        formatter: (value) => numberFormatter(value),
+                        color: "blue",
+                        textStrokeColor: "white",
+                        textStrokeWidth: 5,
                         labels: {
-                            title: {
-                                font: {
-                                    weight: 'bold',
-                                },
+                          title: {
+                            font: {
+                              weight: "bold",
                             },
-                            value: {
-                                color: 'green',
-                            },
+                          },
+                          value: {
+                            color: "black",
+                          },
                         },
                     },
                 },
