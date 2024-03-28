@@ -294,6 +294,13 @@ async function handleAxisMenuButtons(ctx: CustomChartContext) {
         });
 }
 
+async function handleLiveboardContextSection(ctx: CustomChartContext) {
+    const {isLiveboardContext = false} = ctx.getAppConfig().appOptions;
+    document.getElementById('context-status').style.display = 'inline';
+    document.getElementById('context-status').textContent += `${isLiveboardContext}`;
+    document.getElementById('context-edit').style.opacity = isLiveboardContext ? '.4': '1';
+}
+
 async function render(ctx: CustomChartContext) {
     const chartModel = ctx.getChartModel();
     const dataModel = getDataModel(chartModel);
@@ -377,6 +384,7 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
         await renderTML(ctx);
         await renderKPIs(ctx);
         await handleAxisMenuButtons(ctx);
+        await handleLiveboardContextSection(ctx);
     } catch (e) {
         ctx.emitEvent(ChartToTSEvent.RenderError, {
             hasError: true,
