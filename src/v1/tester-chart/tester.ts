@@ -301,6 +301,12 @@ async function handleLiveboardContextSection(ctx: CustomChartContext) {
     document.getElementById('context-edit').style.opacity = isLiveboardContext ? '.4': '1';
 }
 
+async function handleLocaleInfo(ctx: CustomChartContext) {
+    const {locale = window.navigator.language} = ctx.getAppConfig().localeOptions;
+    document.getElementById('locale-info').style.display = 'inline';
+    document.getElementById('locale-info').textContent += `${locale}`;
+}
+
 async function render(ctx: CustomChartContext) {
     const chartModel = ctx.getChartModel();
     const dataModel = getDataModel(chartModel);
@@ -385,6 +391,7 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
         await renderKPIs(ctx);
         await handleAxisMenuButtons(ctx);
         await handleLiveboardContextSection(ctx);
+        await handleLocaleInfo(ctx);
     } catch (e) {
         ctx.emitEvent(ChartToTSEvent.RenderError, {
             hasError: true,
