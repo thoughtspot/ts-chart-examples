@@ -307,6 +307,12 @@ async function handleLocaleInfo(ctx: CustomChartContext) {
     document.getElementById('locale-info').textContent += `${locale}`;
 }
 
+async function handlePrintModeInfo(ctx: CustomChartContext) {
+    const {isPrintMode = false} = ctx.getAppConfig().appOptions;
+    document.getElementById('printmode-info').style.display = 'inline';
+    document.getElementById('printmode-info').textContent += `${isPrintMode}`;
+}
+
 async function render(ctx: CustomChartContext) {
     const chartModel = ctx.getChartModel();
     const dataModel = getDataModel(chartModel);
@@ -392,6 +398,7 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
         await handleAxisMenuButtons(ctx);
         await handleLiveboardContextSection(ctx);
         await handleLocaleInfo(ctx);
+        await handlePrintModeInfo(ctx);
     } catch (e) {
         ctx.emitEvent(ChartToTSEvent.RenderError, {
             hasError: true,
