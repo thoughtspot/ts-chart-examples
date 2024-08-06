@@ -23,7 +23,7 @@
     "vite-plugin-react": "^3.0.2"
   },
   "dependencies": {
-    "@thoughtspot/ts-chart-sdk": "0.0.2-alpha.3",
+    "@thoughtspot/ts-chart-sdk": "0.0.2-alpha.8",
     "chart.js": "3.5.0",
     "chartjs-plugin-datalabels": "2.2.0",
     "eslint": "8.40.0",
