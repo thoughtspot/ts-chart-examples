@@ -1,5 +1,9 @@
 [
   {
+    "name": "bar-chart-with-measure-names-values",
+    "sourceUrl": "http://localhost:3002/v1/bar-chart-with-measure-names-values/"
+  },
+  {
     "name": "combo-chart",
     "sourceUrl": "http://localhost:3002/v1/combo-chart/"
   },
