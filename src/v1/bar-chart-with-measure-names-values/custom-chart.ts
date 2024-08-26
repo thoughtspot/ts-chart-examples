@@ -401,7 +401,13 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
                         (acc: Query, dimension) => ({
                             queryColumns: [
                                 ...acc.queryColumns,
-                                ...dimension.columns,
+                                ...dimension.columns.map(col => {
+                                    return {
+                                        ...col,
+                                        isMeasureValue:
+                                            dimension.key === 'measureValues',
+                                    };
+                                }),
                             ],
                         }),
                         {

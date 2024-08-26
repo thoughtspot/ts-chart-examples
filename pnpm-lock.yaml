@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@thoughtspot/ts-chart-sdk':
-    specifier: 0.0.2-alpha.9
-    version: 0.0.2-alpha.9
+    specifier: 0.0.2-alpha.12
+    version: 0.0.2-alpha.12
   chart.js:
     specifier: 3.5.0
     version: 3.5.0
@@ -752,8 +752,8 @@ packages:
     dev: false
     optional: true
 
-  /@thoughtspot/ts-chart-sdk@0.0.2-alpha.9:
-    resolution: {integrity: sha512-PI3H1o1n0FhGUXj4LBg5m/OEHe2e2mkkuORXR0kceZDK/CHsGklaOhL4ZKwJSzQQLrjPHP0Hvc94Jfe62Z40Pw==}
+  /@thoughtspot/ts-chart-sdk@0.0.2-alpha.12:
+    resolution: {integrity: sha512-cIK/4d2QXVupA/fKpasXeRkiYn5IghOUVQp4FlWLwr1NUsAb9pTYLVXV6wox/YIumDS1Us0kxOA+3PTgrx32UA==}
     dependencies:
       lodash: 4.17.21
       luxon: 3.5.0
