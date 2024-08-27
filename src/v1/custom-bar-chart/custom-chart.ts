@@ -11,6 +11,7 @@
 import {
     ChartColumn,
     ChartConfig,
+    ChartConfigEditorDefinition,
     ChartModel,
     ChartToTSEvent,
     ColumnType,
@@ -20,6 +21,7 @@ import {
     PointVal,
     Query,
     ValidationResponse,
+    VisualPropEditorDefinition,
     VisualProps,
 } from '@thoughtspot/ts-chart-sdk';
 import Chart from 'chart.js/auto';
@@ -237,136 +239,163 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
 
 (async () => {
     const ctx = await getChartContext({
-        getDefaultChartConfig: (chartModel: ChartModel): ChartConfig[] => {
-            const cols = chartModel.columns;
+      getDefaultChartConfig: (chartModel: ChartModel): ChartConfig[] => {
+        const cols = chartModel.columns;
 
-            const measureColumns = _.filter(
-                cols,
-                col => col.type === ColumnType.MEASURE,
-            );
+        const measureColumns = _.filter(
+          cols,
+          (col) => col.type === ColumnType.MEASURE
+        );
 
-            const attributeColumns = _.filter(
-                cols,
-                col => col.type === ColumnType.ATTRIBUTE,
-            );
+        const attributeColumns = _.filter(
+          cols,
+          (col) => col.type === ColumnType.ATTRIBUTE
+        );
 
-            const axisConfig: ChartConfig = {
-                key: 'column',
-                dimensions: [
-                    {
-                        key: 'x',
-                        columns: [attributeColumns[0]],
-                    },
-                    {
-                        key: 'y',
-                        columns: measureColumns.slice(0, 2),
-                    },
-                ],
-            };
-            return [axisConfig];
-        },
-        getQueriesFromChartConfig: (
-            chartConfig: ChartConfig[],
-        ): Array<Query> => {
-            const queries = chartConfig.map(
-                (config: ChartConfig): Query =>
-                    _.reduce(
-                        config.dimensions,
-                        (acc: Query, dimension) => ({
-                            queryColumns: [
-                                ...acc.queryColumns,
-                                ...dimension.columns,
-                            ],
-                        }),
-                        {
-                            queryColumns: [],
-                        } as Query,
-                    ),
-            );
-            return queries;
-        },
-        renderChart: ctx => renderChart(ctx),
-        chartConfigEditorDefinition: [
+        const axisConfig: ChartConfig = {
+          key: 'column',
+          dimensions: [
             {
-                key: 'column',
-                label: 'Custom Column',
-                descriptionText:
-                    'X Axis can only have attributes, Y Axis can only have measures, Color can only have attributes. ' +
-                    'Should have just 1 column in Y axis with colors columns.',
-                columnSections: [
-                    {
-                        key: 'x',
-                        label: 'Custom X Axis',
-                        allowAttributeColumns: true,
-                        allowMeasureColumns: false,
-                        allowTimeSeriesColumns: true,
-                        maxColumnCount: 1,
-                    },
-                    {
-                        key: 'y',
-                        label: 'Custom Y Axis',
-                        allowAttributeColumns: false,
-                        allowMeasureColumns: true,
-                        allowTimeSeriesColumns: false,
-                    },
-                ],
+              key: 'x',
+              columns: [attributeColumns[0]],
             },
-        ],
-        visualPropEditorDefinition: {
-            elements: [
-                {
-                    key: 'color',
-                    type: 'radio',
-                    defaultValue: 'red',
-                    values: ['red', 'green', 'yellow'],
-                    label: 'Colors',
-                },
-                {
-                    type: 'section',
-                    key: 'accordion',
-                    label: 'Accordion',
-                    children: [
-                        {
-                            key: 'Color2',
-                            type: 'radio',
-                            defaultValue: 'blue',
-                            values: ['blue', 'white', 'red'],
-                            label: 'Color2',
-                        },
-                        {
-                            key: 'datalabels',
-                            type: 'toggle',
-                            defaultValue: false,
-                            label: 'Data Labels',
-                        },
-                    ],
-                },
+            {
+              key: 'y',
+              columns: measureColumns.slice(0, 2),
+            },
+          ],
+        };
+        return [axisConfig];
+      },
+      getQueriesFromChartConfig: (chartConfig: ChartConfig[]): Array<Query> => {
+        const queries = chartConfig.map(
+          (config: ChartConfig): Query =>
+            _.reduce(
+              config.dimensions,
+              (acc: Query, dimension) => ({
+                queryColumns: [...acc.queryColumns, ...dimension.columns],
+              }),
+              {
+                queryColumns: [],
+              } as Query
+            )
+        );
+        return queries;
+      },
+      renderChart: (ctx) => renderChart(ctx),
+      chartConfigEditorDefinition: (
+        currentChartConfig: ChartModel,
+        ctx: CustomChartContext
+      ): ChartConfigEditorDefinition[] => {
+        const { config, visualProps } = currentChartConfig;
+
+        const yColumns = config?.chartConfig?.[0]?.dimensions.find(
+          (dimension) => dimension.key === 'y' && dimension.columns
+        );
+
+        const configDefinition = [
+          {
+            key: 'column',
+            label: 'Custom Column',
+            descriptionText:
+              'X Axis can only have attributes, Y Axis can only have measures, Color can only have attributes. ' +
+              'Should have just 1 column in Y axis with colors columns.',
+            columnSections: [
+              {
+                key: 'x',
+                label: 'Custom X Axis',
+                allowAttributeColumns: true,
+                allowMeasureColumns: false,
+                allowTimeSeriesColumns: true,
+                maxColumnCount: 1,
+              },
+              {
+                key: 'y',
+                label: 'Custom Y Axis',
+                allowAttributeColumns: false,
+                allowMeasureColumns: true,
+                allowTimeSeriesColumns: false,
+              },
             ],
-        },
-        validateConfig: (updatedConfig, chartModel): ValidationResponse => {
-            if (updatedConfig.length !== 1) {
-                return {
-                    isValid: false,
-                    validationErrorMessage: ['invalid config. no config found'],
-                };
-            }
-            // assuming 0 is x dimension
-            const dimensions = updatedConfig[0].dimensions;
-            if (
-                dimensions[0].columns.length === 0 ||
-                dimensions[1].columns.length === 0
-            ) {
-                return {
-                    isValid: false,
-                    validationErrorMessage: [
-                        'Invalid config. X or Y axis columns cannot be empty.',
-                    ],
-                };
-            }
-            return {
-                isValid: true,
-            };
-        },
+          },
+        ];
+        if (yColumns?.columns.length) {
+          for (let i = 0; i < yColumns.columns.length; i++) {
+            configDefinition[0].columnSections.push({
+              key: `layers${i}`,
+              label: `Measures layer${i}`,
+              allowAttributeColumns: false,
+              allowMeasureColumns: true,
+              allowTimeSeriesColumns: false,
+            });
+          }
+        }
+        return configDefinition;
+      },
+      visualPropEditorDefinition: (
+        currentVisualProps: ChartModel,
+        ctx: CustomChartContext
+      ): VisualPropEditorDefinition => {
+        const { visualProps } = currentVisualProps as any;
+        const elements: any = [
+          {
+            key: 'color',
+            type: 'radio',
+            defaultValue: 'red',
+            values: ['red', 'green', 'yellow'],
+            label: 'Colors',
+          },
+          {
+            type: 'section',
+            key: 'accordion',
+            label: 'Accordion',
+            children: [
+              {
+                key: 'datalabels',
+                type: 'toggle',
+                defaultValue: false,
+                label: 'Data Labels',
+              },
+            ],
+          },
+        ];
+        if (visualProps?.length !== 0) {
+          if (visualProps?.accordion?.datalabels) {
+            elements[1].children?.push({
+              key: 'Color2',
+              type: 'radio',
+              defaultValue: 'blue',
+              values: ['blue', 'white', 'red'],
+              label: 'Color2',
+            });
+          }
+        }
+        return { elements };
+      },
+      validateConfig: (updatedConfig, chartModel): ValidationResponse => {
+        if (updatedConfig.length !== 1) {
+          return {
+            isValid: false,
+            validationErrorMessage: ['invalid config. no config found'],
+          };
+        }
+        // assuming 0 is x dimension
+        const dimensions = updatedConfig[0].dimensions;
+        if (
+          dimensions[0].columns.length === 0 ||
+          dimensions[1].columns.length === 0
+        ) {
+          return {
+            isValid: false,
+            validationErrorMessage: [
+              'Invalid config. X or Y axis columns cannot be empty.',
+            ],
+          };
+        }
+        return {
+          isValid: true,
+        };
+      },
     });
 
     renderChart(ctx);
