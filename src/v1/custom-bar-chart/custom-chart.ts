@@ -17,6 +17,7 @@ import {
     ColumnType,
     CustomChartContext,
     DataPointsArray,
+    getCfForColumn,
     getChartContext,
     PointVal,
     Query,
@@ -27,20 +28,14 @@ import {
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import _ from 'lodash';
+import { getBackgroundColor, getPlotLinesAndBandsFromConditionalFormatting, visualPropKeyMap } from './custom-chart.utils';
+import { createPlotbandPlugin, createPlotlinePlugin } from './custom-chart-plugins';
 
 const logger = console;
 
 Chart.register(ChartDataLabels);
 
 let globalChartReference: Chart;
-
-const availableColor = ['red', 'green', 'blue'];
-
-const visualPropKeyMap = {
-    0: 'color',
-    1: 'accordion.Color2',
-    2: 'accordion.datalabels',
-};
 
 const numberFormatter = (value) => {
     if (value > 1000000000) {
@@ -73,25 +68,41 @@ function getColumnDataModel(
     return {
         getLabels: () => getDataForColumn(xAxisColumns[0], dataArr),
         getDatasets: () =>
-            _.map(yAxisColumns, (col, idx) => ({
-                label: col.name,
-                data: getDataForColumn(col, dataArr),
-                yAxisID: `${type}-y${idx.toString()}`,
-                type: `${type}`,
-                backgroundColor: _.get(
-                    visualProps,
-                    visualPropKeyMap?.[idx],
-                    availableColor[idx],
-                ),
-                borderColor: _.get(
-                    visualProps,
-                    visualPropKeyMap?.[idx],
-                    availableColor[idx],
-                ),
-                datalabels: {
-                    anchor: 'end',
-                },
-            })),
+          _.map(yAxisColumns, (col, idx) => {
+              const coldata = getDataForColumn(col, dataArr);
+              const CFforColumn = getCfForColumn(col);
+              const axisId = `${type}-y${idx.toString()}`;
+              const color = coldata.map((value, index) =>
+                  getBackgroundColor(
+                      null,
+                      visualProps,
+                      idx,
+                      dataArr,
+                      CFforColumn,
+                      index,
+                      col.id,
+                  ),
+              );
+              const { plotlines, plotbands } =
+                  getPlotLinesAndBandsFromConditionalFormatting(
+                      CFforColumn,
+                      axisId,
+                  );
+
+              return {
+                  label: col.name,
+                  data: coldata,
+                  yAxisID: axisId,
+                  type: `${type}`,
+                  backgroundColor: color,
+                  borderColor: color,
+                  datalabels: {
+                      anchor: 'end',
+                  },
+                  plotlines,
+                  plotbands,
+              };
+          }),
         getScales: () =>
             _.reduce(
                 yAxisColumns,
@@ -213,6 +224,10 @@ function render(ctx: CustomChartContext) {
                     });
                 },
             },
+            plugins: [
+              createPlotlinePlugin(dataModel),
+              createPlotbandPlugin(dataModel),
+          ],
         });
     } catch (e) {
         logger.error('renderfailed', e);
