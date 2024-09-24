@@ -413,6 +413,7 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
       },
       allowedConfigurations: {
         allowColumnConditionalFormatting: true,
+        allowColumnNumberFormatting: true,
       },
     });
 
