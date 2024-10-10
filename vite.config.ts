@@ -11,10 +11,6 @@ const chartPackages = sourceFolders.flatMap((srcPath) =>
     .map((dirent) => ({ name: dirent.name, folder: srcPath }))
 );
 
-// const chartPackages = readdirSync(join('src', 'v1'), { withFileTypes: true })
-//   .filter((dirent) => dirent.isDirectory())
-//   .map((dirent) => dirent.name);
-
 const port = process.env.port || 3002; // Default to port 3002 if PORT environment variable is not set
 
 const hostURL = `http://localhost:${port}`;
