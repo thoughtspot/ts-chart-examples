@@ -26,5 +26,9 @@
   {
     "name": "tester-chart",
     "sourceUrl": "http://localhost:3002/v1/tester-chart/"
+  },
+  {
+    "name": "custom-bar-chart",
+    "sourceUrl": "http://localhost:3002/v10_5/custom-bar-chart/"
   }
 ]

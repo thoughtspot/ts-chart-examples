@@ -8,3 +8,4 @@ lib
 .DS_Store
 src/.DS_Store
 dist
+.vercel
