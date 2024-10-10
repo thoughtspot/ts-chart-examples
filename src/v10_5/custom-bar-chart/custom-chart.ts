@@ -24,6 +24,7 @@ import {
   ValidationResponse,
   VisualPropEditorDefinition,
   VisualProps,
+  ColumnProp,
 } from '@thoughtspot/ts-chart-sdk';
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -92,14 +93,21 @@ function getColumnDataModel(
         );
         const { plotlines, plotbands } =
           getPlotLinesAndBandsFromConditionalFormatting(CFforColumn, axisId);
-
+        const borderRadius =
+          Number(visualProps?.columnVisualProps?.[col.id]?.borderRadius) || 2;
+        const borderThickness =
+          Number(visualProps?.columnVisualProps?.[col.id]?.borderThickness) ||
+          2;
         return {
           label: col.name,
           data: coldata,
           yAxisID: axisId,
           type: `${type}`,
           backgroundColor: color,
-          borderColor: color,
+          borderColor: 'blue',
+          borderRadius,
+          borderWidth: borderThickness,
+          // barThickness: 100,
           datalabels: {
             anchor: 'end',
           },
@@ -216,6 +224,17 @@ function render(ctx: CustomChartContext) {
             dataY,
             dataModel.getPointDetails(dataX, dataY)
           );
+          if (typeof chartModel?.visualProps === 'object') {
+            ctx.emitEvent(ChartToTSEvent.UpdateVisualProps, {
+              visualProps: {
+                ...chartModel?.visualProps,
+                clientState: JSON.stringify({
+                  x: dataX,
+                  y: dataY,
+                }),
+              },
+            });
+          }
           ctx.emitEvent(ChartToTSEvent.OpenContextMenu, {
             event: getParsedEvent(e),
             clickedPoint: {
@@ -322,7 +341,7 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
               allowAttributeColumns: true,
               allowMeasureColumns: false,
               allowTimeSeriesColumns: true,
-              maxColumnCount: 1,
+              maxColumnCount: 10000,
             },
             {
               key: 'y',
@@ -349,9 +368,22 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
     },
     visualPropEditorDefinition: (
       currentVisualProps: ChartModel,
-      ctx: CustomChartContext
+      ctx: CustomChartContext,
+      activeColumnId: string
     ): VisualPropEditorDefinition => {
-      const { visualProps } = currentVisualProps as any;
+      const { visualProps, columns } = currentVisualProps;
+      const measureColumns = _.filter(
+        columns,
+        (col) => col.type === ColumnType.MEASURE
+      );
+
+      const attributeColumns = _.filter(
+        columns,
+        (col) => col.type === ColumnType.ATTRIBUTE
+      );
+
+      console.warn(attributeColumns, measureColumns);
+
       const elements: any = [
         {
           key: 'color',
@@ -374,8 +406,13 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
           ],
         },
       ];
-      if (visualProps?.length !== 0) {
-        if (visualProps?.accordion?.datalabels) {
+      // This is lazy have proper checks for unknown types. We can do better.
+      if ((visualProps as any)?.length !== 0) {
+        if (
+          (visualProps as any)?.accordion?.datalabels ||
+          (visualProps as any)?.columnVisualProps?.[activeColumnId]?.accordion
+            ?.datalabels
+        ) {
           elements[1].children?.push({
             key: 'Color2',
             type: 'radio',
@@ -385,7 +422,98 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
           });
         }
       }
-      return { elements };
+      const columnPropMeasure: ColumnProp = {
+        type: ColumnType.MEASURE,
+        columnSettingsDefinition: measureColumns.reduce(
+          (prev: any, next: ChartColumn) => {
+            prev[next.id] = {
+              elements: [
+                {
+                  key: 'borderRadius',
+                  type: 'radio',
+                  defaultValue: '5',
+                  values: ['5', '10', '15'],
+                  label: 'Border Radius',
+                },
+                {
+                  key: 'borderThickness',
+                  type: 'dropdown',
+                  defaultValue: '2',
+                  values: ['2', '4', '6', '8', '10', '12', '14', '16'],
+                  label: 'Border Thickness',
+                },
+              ],
+            };
+            return prev;
+          },
+          {}
+        ),
+      };
+      const columnPropMeasure1: ColumnProp = {
+        type: ColumnType.MEASURE,
+        columnSettingsDefinition: measureColumns.reduce(
+          (prev: any, next: ChartColumn) => {
+            prev[next.id] = {
+              elements: [
+                {
+                  key: 'borderRadius',
+                  type: 'radio',
+                  defaultValue: '5',
+                  values: ['5', '10', '15'],
+                  label: 'Border Radius',
+                },
+                {
+                  key: 'borderThickness',
+                  type: 'dropdown',
+                  defaultValue: '2',
+                  values: ['2', '4', '6', '8', '10', '12', '14', '16'],
+                  label: 'Border Thickness',
+                },
+              ],
+            };
+            return prev;
+          },
+          {}
+        ),
+      };
+      const columnPropAttribute: ColumnProp = {
+        type: ColumnType.ATTRIBUTE,
+        columnSettingsDefinition: attributeColumns.reduce(
+          (prev: any, next: ChartColumn) => {
+            prev[next.id] = {
+              elements: [
+                {
+                  key: 'borderRadius',
+                  type: 'radio',
+                  defaultValue: '5',
+                  values: ['5', '10', '15'],
+                  label: 'Border Radius',
+                },
+                {
+                  key: 'borderThickness',
+                  type: 'dropdown',
+                  defaultValue: '2',
+                  values: ['2', '4', '6', '8', '10', '12', '14', '16'],
+                  label: 'Border Thickness',
+                },
+                {
+                  key: 'datalabels',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  label: 'Datalabel',
+                  disabled: false,
+                },
+              ],
+            };
+            return prev;
+          },
+          {}
+        ),
+      };
+      return {
+        elements,
+        columnsVizPropDefinition: [columnPropMeasure],
+      };
     },
     validateConfig: (updatedConfig, chartModel): ValidationResponse => {
       if (updatedConfig.length !== 1) {
@@ -413,7 +541,6 @@ const renderChart = async (ctx: CustomChartContext): Promise<void> => {
     },
     allowedConfigurations: {
       allowColumnConditionalFormatting: true,
-      allowColumnNumberFormatting: true,
     },
   });
 

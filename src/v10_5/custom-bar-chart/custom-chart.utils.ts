@@ -46,18 +46,25 @@ export const availableColor = ['red', 'green', 'blue'];
 
 export function getBackgroundColor(
   customStyleConfig: ChartSdkCustomStylingConfig,
-  visualProps: VisualProps,
+  visualProps: any,
   idx: any,
   dataArr: any,
   CFforColumn: any,
   index: number,
   colId: any
 ) {
+  // change logic for picking color, color 2 should only be picked up if datalabels value is enabled
+  const color2NotAvailable =
+    idx === 1 && visualProps?.accordion?.datalabels === false;
   const color =
     customStyleConfig?.chartColorPalettes?.length &&
     customStyleConfig?.chartColorPalettes[0].colors.length > 0
       ? customStyleConfig?.chartColorPalettes[0].colors
-      : _.get(visualProps, visualPropKeyMap?.[idx], availableColor[idx]);
+      : _.get(
+          visualProps,
+          !color2NotAvailable ? visualPropKeyMap?.[idx] : null,
+          availableColor[idx]
+        );
 
   const applicableFormatting = applicableConditionalFormatting(
     index,
