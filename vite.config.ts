@@ -1,12 +1,12 @@
-import react from '@vitejs/plugin-react';
-import { ProxyOptions, defineConfig } from 'vite';
-import { join } from 'path';
-import { readdirSync, writeFileSync } from 'fs';
+import react from "@vitejs/plugin-react";
+import { ProxyOptions, defineConfig } from "vite";
+import { join } from "path";
+import { readdirSync, writeFileSync } from "fs";
 
-const sourceFolders = ['v1', 'v10_5'];
+const sourceFolders = ["v1", "v10_5", "v10_6"];
 
 const chartPackages = sourceFolders.flatMap((srcPath) =>
-  readdirSync(join('src', srcPath), { withFileTypes: true })
+  readdirSync(join("src", srcPath), { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => ({ name: dirent.name, folder: srcPath }))
 );
@@ -24,7 +24,7 @@ const urls = chartPackages.map(({ name: folder, folder: srcPath }) => {
   proxyOption[pathKey] = {
     target: targetUrl,
     changeOrigin: true,
-    rewrite: (path) => path.replace(pathKey, ''),
+    rewrite: (path) => path.replace(pathKey, ""),
     ignorePath: true,
   } as ProxyOptions;
   return {
@@ -35,12 +35,12 @@ const urls = chartPackages.map(({ name: folder, folder: srcPath }) => {
 
 // Write the JSON file
 // Check generated_urls.json for all generated URLS
-const jsonFilePath = join(__dirname, 'generated_urls.json');
+const jsonFilePath = join(__dirname, "generated_urls.json");
 writeFileSync(jsonFilePath, JSON.stringify(urls, null, 2));
 
 export default defineConfig({
   // base: './',
-  root: 'src',
+  root: "src",
   plugins: [react()],
   optimizeDeps: {
     esbuildOptions: {
@@ -48,11 +48,11 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../dist',
+    outDir: "../dist",
     rollupOptions: {
       input: chartPackages.reduce(
         (entries, { name: folder, folder: srcPath }) => {
-          entries[folder] = join('src', srcPath, `/${folder}/index.html`);
+          entries[folder] = join("src", srcPath, `/${folder}/index.html`);
           return entries;
         },
         {}
