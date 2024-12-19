@@ -34,5 +34,9 @@
   {
     "name": "custom-bar-chart-10_5",
     "sourceUrl": "http://localhost:3002/v10_5/custom-bar-chart-10_5/"
+  },
+  {
+    "name": "custom-bar-chart-10_6",
+    "sourceUrl": "http://localhost:3002/v10_6/custom-bar-chart-10_6/"
   }
 ]
