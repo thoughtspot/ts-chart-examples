@@ -3,7 +3,7 @@ import { ProxyOptions, defineConfig } from "vite";
 import { join } from "path";
 import { readdirSync, writeFileSync } from "fs";
 
-const sourceFolders = ["v1", "v10_5", "v10_6"];
+const sourceFolders = ["v1", "v10_5", "v10_6", "v10_7"];
 
 const chartPackages = sourceFolders.flatMap((srcPath) =>
   readdirSync(join("src", srcPath), { withFileTypes: true })

@@ -38,5 +38,9 @@
   {
     "name": "custom-bar-chart-10_6",
     "sourceUrl": "http://localhost:3002/v10_6/custom-bar-chart-10_6/"
+  },
+  {
+    "name": "tester-chart-10_7",
+    "sourceUrl": "http://localhost:3002/v10_7/tester-chart-10_7/"
   }
 ]
