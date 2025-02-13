@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TS TML chart</title>
+    <script type="module" crossorigin src="https://thoughtspot.github.io/ts-chart-examples/assets/tester-chart-10_7-8edd78fc.js"></script>
+    <link rel="modulepreload" crossorigin href="https://thoughtspot.github.io/ts-chart-examples/assets/number-formatting-70b2729e.js">
+    <link rel="modulepreload" crossorigin href="https://thoughtspot.github.io/ts-chart-examples/assets/chartjs-plugin-datalabels.esm-3e57def8.js">
+    <link rel="modulepreload" crossorigin href="https://thoughtspot.github.io/ts-chart-examples/assets/auto.esm-c3926bfe.js">
+  </head>
+
+  <body>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: medium;
+        width: 600px;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #2770ef;
+        color: white;
+        box-shadow: none;
+        border-radius: 20px;
+        border: 0;
+        margin: 5px 0px;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        margin: 10px;
+        padding: 10px;
+        background-color: #eee;
+        border-radius: 5px;
+        box-shadow: inset;
+      }
+
+      input {
+        min-width: 550px;
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: 0;
+      }
+    </style>
+    <div style="width: 99vw; height: 95vh; position: relative">
+      <h3>TML Query</h3>
+      <div style="display: block" class="container" id="tml-box"></div>
+      <h3>Data Query</h3>
+      <div style="display: block" class="container" id="kpi-box"></div>
+      <h3>Axis Menus</h3>
+      <div style="display: block" class="container" id="axis-menu-box">
+        <button id="close-axis-menu">Close Axis Menu</button>
+        <button id="open-axis-menu">Open Axis Menu</button>
+        <button id="open-single-column-menu">
+          Open Single Column Axis Menu
+        </button>
+        <button id="show-event-error">Show Event Error</button>
+      </div>
+      <h3>Context Menus</h3>
+      <div style="display: block" class="container" id="context-menu-box">
+        <button id="close-context-menu">Close Context Menu</button>
+        <button id="open-context-menu">Open Context Menu</button>
+      </div>
+      <h3>Print mode Info</h3>
+      <div style="display: block" class="container" id="printmode-menu-box">
+        <h4 id="printmode-info"></h4>
+      </div>
+      <h3>Liveboard Context</h3>
+      <div style="display: block" class="container" id="context-menu-box">
+        <h4 id="context-status"></h4>
+        <button id="context-edit">Edit</button>
+      </div>
+      <h3>Locale Info</h3>
+      <div style="display: block" class="container" id="locale-menu-box">
+        <h4 id="locale-info"></h4>
+      </div>
+      <h3>Update VisualProps</h3>
+      <div style="display: block" class="container" id="update-visual-props">
+        <button id="update-visual-props-button">Update VisualProps</button>
+      </div>
+    </div>
+    
+  </body>
+</html>
