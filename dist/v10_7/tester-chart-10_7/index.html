@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TS TML chart</title>
+    <script type="module" crossorigin src="https://thoughtspot.github.io/ts-chart-examples/assets/tester-chart-10_7-8edd78fc.js"></script>
+    <link rel="modulepreload" crossorigin href="https://thoughtspot.github.io/ts-chart-examples/assets/number-formatting-70b2729e.js">
+    <link rel="modulepreload" crossorigin href="https://thoughtspot.github.io/ts-chart-examples/assets/chartjs-plugin-datalabels.esm-3e57def8.js">
+    <link rel="modulepreload" crossorigin href="https://thoughtspot.github.io/ts-chart-examples/assets/auto.esm-c3926bfe.js">
   </head>
 
   <body>
@@ -52,7 +56,6 @@
         <button id="open-single-column-menu">
           Open Single Column Axis Menu
         </button>
-        <button id="update-visual-props-button">Update VisualProps</button>
         <button id="show-event-error">Show Event Error</button>
       </div>
       <h3>Context Menus</h3>
@@ -73,7 +76,11 @@
       <div style="display: block" class="container" id="locale-menu-box">
         <h4 id="locale-info"></h4>
       </div>
+      <h3>Update VisualProps</h3>
+      <div style="display: block" class="container" id="update-visual-props">
+        <button id="update-visual-props-button">Update VisualProps</button>
+      </div>
     </div>
-    <script type="module" src="./tester.ts"></script>
+    
   </body>
 </html>
