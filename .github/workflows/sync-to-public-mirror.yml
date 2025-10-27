@@ -5,6 +5,7 @@ on:
     types: [closed]
     branches:
      - main
+     - gh-pages
   workflow_dispatch:
     inputs:
       force_sync:
