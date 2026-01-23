@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@thoughtspot/ts-chart-sdk':
-    specifier: 0.0.2-alpha.26
-    version: 0.0.2-alpha.26
+    specifier: 1.0.0
+    version: 1.0.0
   chart.js:
     specifier: 3.5.0
     version: 3.5.0
@@ -45,8 +45,8 @@ dependencies:
     specifier: 10.2.0
     version: 10.2.0
   lodash:
-    specifier: ^4.17.21
-    version: 4.17.21
+    specifier: ^4.17.23
+    version: 4.17.23
   react:
     specifier: 17.0.2
     version: 17.0.2
@@ -771,12 +771,12 @@ packages:
     dev: false
     optional: true
 
-  /@thoughtspot/ts-chart-sdk@0.0.2-alpha.26:
-    resolution: {integrity: sha512-1b8+HZX6z9TwIRk9gJRyVlfp4OVs16sdRHMIUFVuh+WgNH/gzxulfvK//OfO2j6dvj9ye07YmHm+azxJRdu1Yw==}
+  /@thoughtspot/ts-chart-sdk@1.0.0:
+    resolution: {integrity: sha512-bX+1FrM5y8kAqgfUi8rwaVCdRmbYavuC9xixs9I0mRoMnWIjyaWM07lTWodJKyEOowM4HD4hVo9wbe4Awy5B+A==}
     dependencies:
       cldr-data: 36.0.2
       globalize: 1.7.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       luxon: 3.5.0
       promise-postmessage: 3.5.1
       react: 17.0.2
@@ -2251,8 +2251,8 @@ packages:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
     dev: false
 
-  /lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+  /lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
     dev: false
 
   /loose-envify@1.4.0:
