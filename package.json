@@ -23,7 +23,7 @@
     "vite-plugin-react": "^3.0.2"
   },
   "dependencies": {
-    "@thoughtspot/ts-chart-sdk": "0.0.2-alpha.26",
+    "@thoughtspot/ts-chart-sdk": "1.0.0",
     "chart.js": "3.5.0",
     "chartjs-plugin-datalabels": "2.2.0",
     "eslint": "8.40.0",
@@ -36,7 +36,7 @@
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "eslint-plugin-thoughtspot-eslint": "git+https://github.com/ts-blink/thoughtspot-eslint.git",
     "highcharts": "10.2.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.1",
     "react": "17.0.2",
     "react-chartjs-2": "5.2.0",
     "react-dom": "^17.0.2"
